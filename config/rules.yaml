@@ -1,0 +1,83 @@
+# Règles de gestion & contraintes de qualité — lues par src/quality_engine.py
+# categorie : Complétude | Exactitude | Fraîcheur (3 axes du Data Health Score)
+# critique : une violation pèse 3x plus lourd qu'une règle non critique dans le score pondéré
+
+reference:
+  date_reference: "2026-08-12"  # date simulée d'exécution du pipeline
+  fenetre_fraicheur_jours: 4000  # ~11 ans : au-delà, une adhésion est jugée "non rafraîchie"
+
+regles:
+  - champ: numero_societaire
+    regle: not_null
+    categorie: Complétude
+    critique: true
+    description: "Numéro de sociétaire renseigné"
+
+  - champ: numero_societaire
+    regle: unique
+    categorie: Exactitude
+    critique: true
+    description: "Numéro de sociétaire unique (pas de doublon entre deux dossiers)"
+
+  - champ: email
+    regle: not_null
+    categorie: Complétude
+    critique: true
+    description: "Email renseigné"
+
+  - champ: email
+    regle: format_email
+    categorie: Exactitude
+    critique: true
+    description: "Email au format valide (contient un @)"
+
+  - champ: telephone
+    regle: longueur_exacte
+    params:
+      longueur: 10
+    categorie: Exactitude
+    critique: false
+    description: "Téléphone à 10 chiffres"
+
+  - champ: date_naissance
+    regle: pas_dans_le_futur
+    categorie: Exactitude
+    critique: true
+    description: "Date de naissance pas dans le futur"
+
+  - champ: date_naissance
+    regle: age_plausible
+    params:
+      age_min: 18
+      age_max: 110
+    categorie: Exactitude
+    critique: true
+    description: "Âge du sociétaire plausible (18 à 110 ans)"
+
+  - champ: date_adhesion
+    regle: pas_dans_le_futur
+    categorie: Fraîcheur
+    critique: true
+    description: "Date d'adhésion pas dans le futur"
+
+  - champ: date_adhesion
+    regle: pas_trop_ancienne
+    categorie: Fraîcheur
+    critique: false
+    description: "Adhésion rafraîchie depuis moins de 11 ans"
+
+  - champ: formule
+    regle: valeur_dans_liste
+    params:
+      valeurs: ["Essentielle", "Confort", "Premium"]
+    categorie: Exactitude
+    critique: false
+    description: "Formule reconnue dans le catalogue"
+
+  - champ: statut
+    regle: valeur_dans_liste
+    params:
+      valeurs: ["Actif", "Résilié", "Suspendu"]
+    categorie: Exactitude
+    critique: false
+    description: "Statut reconnu"

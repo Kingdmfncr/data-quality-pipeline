@@ -1,0 +1,88 @@
+# Dictionnaire de données — sociétaires (data-quality-pipeline)
+# pii: donnée à caractère personnel au sens RGPD
+# rgpd_action: traitement appliqué par src/anonymizer.py avant tout usage en aval
+
+champs:
+  numero_societaire:
+    type: string
+    description: Identifiant unique du contrat/sociétaire, format SOC-XXXXXX.
+    pii: false
+    rgpd_action: aucune
+
+  civilite:
+    type: string
+    description: "Civilité déclarée (M. / Mme)."
+    pii: false
+    rgpd_action: aucune
+
+  nom:
+    type: string
+    description: Nom de famille du sociétaire.
+    pii: true
+    rgpd_action: pseudonymisation (hachage stable, non réversible sans le sel)
+
+  prenom:
+    type: string
+    description: Prénom du sociétaire.
+    pii: true
+    rgpd_action: masquage (retiré, remplacé par un identifiant pseudonyme commun avec nom)
+
+  date_naissance:
+    type: date
+    description: Date de naissance, format ISO (AAAA-MM-JJ).
+    pii: true
+    rgpd_action: conservée en clair à ce stade (nécessaire au calcul de l'âge/formule) — généralisation en tranche d'âge recommandée avant tout usage externe, non implémentée dans ce POC.
+
+  email:
+    type: string
+    description: Adresse email de contact.
+    pii: true
+    rgpd_action: conservée en clair à ce stade (clé de contact opérationnelle) — hors périmètre de ce POC, à couvrir dans une itération future.
+
+  telephone:
+    type: string
+    description: Numéro de téléphone mobile, 10 chiffres.
+    pii: true
+    rgpd_action: masquage partiel (2 premiers + 2 derniers chiffres conservés)
+
+  adresse:
+    type: string
+    description: Adresse postale (numéro + rue).
+    pii: true
+    rgpd_action: conservée en clair à ce stade — hors périmètre de ce POC, à couvrir dans une itération future.
+
+  code_postal:
+    type: string
+    description: Code postal, utilisé pour le rattachement géographique.
+    pii: false
+    rgpd_action: aucune (pas identifiant à lui seul)
+
+  ville:
+    type: string
+    description: Ville de résidence déclarée.
+    pii: false
+    rgpd_action: aucune
+
+  iban:
+    type: string
+    description: IBAN de prélèvement des cotisations (fictif dans ce POC).
+    pii: true
+    rgpd_action: masquage partiel (pays + 4 derniers caractères conservés)
+
+  date_adhesion:
+    type: date
+    description: Date d'adhésion au contrat, format ISO.
+    pii: false
+    rgpd_action: aucune
+
+  formule:
+    type: string
+    description: "Formule souscrite : Essentielle / Confort / Premium."
+    pii: false
+    rgpd_action: aucune
+
+  statut:
+    type: string
+    description: "Statut du contrat : Actif / Résilié / Suspendu."
+    pii: false
+    rgpd_action: aucune
