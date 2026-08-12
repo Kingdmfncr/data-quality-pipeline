@@ -31,6 +31,7 @@ Projet construit pas à pas, étape validée avant de passer à la suivante.
 - ✅ **Étape 2 — Moteur de qualité & anonymisation** (`src/quality_engine.py`, `src/anonymizer.py`) : 10 règles déclarées dans `config/rules.yaml` (aucune règle codée en dur), Data Health Score à 3 axes (Complétude 100 / Exactitude 98,3 / Fraîcheur 98,7 sur le dernier jeu généré), export du rapport détaillé et des lignes valides. `anonymizer.py` pseudonymise le nom (hash stable dérivé du numéro de sociétaire, jamais du nom lui-même), masque téléphone et IBAN, et n'anonymise que les lignes déjà validées par le moteur de qualité — jamais une ligne dont l'intégrité n'est pas garantie.
 - ✅ **Étape 3 — Pipeline & entrepôt** (`src/pipeline.py`, `sql/`) : pipeline SQL en couches (staging → marts) exécuté via DuckDB, sans dbt ni entrepôt cloud à connecter. `generator.py` a été complété avec une table `sinistres` (600 lignes, 4 familles d'anomalies orientées règles métier : référence orpheline, remboursement supérieur au montant déclaré, sinistre antérieur à l'adhésion, montant négatif) — nécessaire pour donner un vrai grain à `fact_claims`. Le mart garde tous les sinistres visibles pour l'audit, avec 3 colonnes booléennes d'écart plutôt qu'un filtrage silencieux : sur le dernier lot généré, 59 sinistres référencent un sociétaire absent du référentiel validé (dont 12 volontairement orphelins, le reste provenant de sociétaires eux-mêmes rejetés par le moteur de qualité), 11 sont antérieurs à l'adhésion, 24 ont un remboursement incohérent.
 - ✅ **Étape 4 — Dashboard** (`dashboards/app.py`) : Data Health Scorecard, détail des anomalies (règles sociétaires + écarts `fact_claims`), preuve visuelle du masquage RGPD (avant/après sur nom/téléphone/IBAN), exploration `dim_societaires`/`fact_claims`, et dictionnaire de données interactif filtrable par champ PII.
+- ✅ **Tests** (`tests/test_quality.py`) : 17 tests Pytest — règles de qualité unitaires, reproductibilité du générateur (seed fixe), pseudonymisation/masquage RGPD, et intégrité référentielle de `fact_claims` (référence orpheline, remboursement incohérent, sinistre avant adhésion) sur des cas construits à la main plutôt que sur le jeu généré aléatoire.
 
 Dictionnaire de données complet, avec classification RGPD par champ : voir [`config/data_dictionary.yaml`](config/data_dictionary.yaml).
 
@@ -51,6 +52,9 @@ python src/pipeline.py           # construit l'entrepôt DuckDB (dim_societaires
 
 # Ou directement le dashboard (regénère et rejoue tout le pipeline en mémoire) :
 streamlit run dashboards/app.py
+
+# Tests
+pytest tests/ -v
 ```
 
 ## Pour une mission réelle
